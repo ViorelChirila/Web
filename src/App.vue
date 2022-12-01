@@ -1,15 +1,31 @@
-<script setup></script>
+<script setup>
+import { ref } from "vue";
+import GetPhoto from "./components/GetPhoto.vue";
+
+const theme = ref("light");
+
+function onClick() {
+  theme.value = theme.value === "light" ? "dark" : "light";
+}
+</script>
 
 <template>
-  <header><h1>Photo App</h1></header>
+  <v-app :theme="theme">
+    <v-app-bar>
+      <v-spacer></v-spacer>
 
-  <main>
-    <p>Photo</p>
-  </main>
+      <v-btn
+        :prepend-icon="
+          theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'
+        "
+        @click="onClick"
+        >Toggle Theme</v-btn
+      >
+    </v-app-bar>
+
+    <v-main>
+      <v-container>Content area</v-container>
+      <GetPhoto />
+    </v-main>
+  </v-app>
 </template>
-
-<style scoped>
-header {
-  line-height: 1.5;
-}
-</style>
