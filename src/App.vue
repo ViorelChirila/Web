@@ -1,31 +1,24 @@
 <script setup>
-import { ref } from "vue";
-import GetPhoto from "./components/GetPhoto.vue";
-
-const theme = ref("light");
-
-function onClick() {
-  theme.value = theme.value === "light" ? "dark" : "light";
-}
+import CarouselImages from "./components/CarouselImages.vue";
 </script>
 
 <template>
-  <v-app :theme="theme">
+  <v-app>
     <v-app-bar>
       <v-spacer></v-spacer>
-
-      <v-btn
-        :prepend-icon="
-          theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'
-        "
-        @click="onClick"
-        >Toggle Theme</v-btn
-      >
+      <v-app-bar-title>Photo App</v-app-bar-title>
+      <v-spacer></v-spacer>
+      <v-spacer></v-spacer>
+      <v-spacer></v-spacer>
+      <v-btn variant="plain" size="large">Home</v-btn>
+      <v-btn variant="plain" size="large">Search</v-btn>
+      <v-btn variant="plain" size="large">About</v-btn>
+      <v-btn variant="plain" size="large">Contact</v-btn>
     </v-app-bar>
 
     <v-main>
-      <v-container>Content area</v-container>
-      <GetPhoto />
+      <CarouselImages />
     </v-main>
   </v-app>
 </template>
+<style scoped></style>
