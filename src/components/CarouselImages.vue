@@ -31,6 +31,7 @@ export default {
     onClick() {
       this.loading = true;
       console.log(this.searchInput);
+      window.location.href = "#/search";
 
       setTimeout(() => {
         this.loading = false;
