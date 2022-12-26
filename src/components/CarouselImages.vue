@@ -1,4 +1,5 @@
 <script>
+import { store } from "../store.js";
 export default {
   data() {
     return {
@@ -6,7 +7,7 @@ export default {
       items: [],
       loaded: false,
       loading: false,
-      searchInput: "",
+      searchValue: "",
     };
   },
   methods: {
@@ -30,7 +31,9 @@ export default {
     },
     onClick() {
       this.loading = true;
-      console.log(this.searchInput);
+      console.log(this.searchValue);
+      // this.emitSearchValueChangedEvent();
+      store.insert(this.searchValue);
       window.location.href = "#/search";
 
       setTimeout(() => {
@@ -38,6 +41,12 @@ export default {
         this.loaded = true;
       }, 2000);
     },
+    // emitSearchValueChangedEvent() {
+    //   this.emitter.emit("search-value-changed", {
+    //     search: this.searchValue,
+    //   });
+    //   console.log("emitter");
+    // },
   },
   mounted() {
     this.loadCarouselPhoto();
@@ -72,7 +81,7 @@ export default {
             @click:append-inner="onClick"
             @keyup.enter="onClick"
             type="input"
-            v-model="searchInput"
+            v-model="searchValue"
           ></v-text-field>
         </v-col>
       </v-row>

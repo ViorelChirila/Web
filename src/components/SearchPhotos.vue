@@ -1,8 +1,30 @@
 <script>
-// import HeaderApp from "./components/HeaderApp.vue";
+import { store } from "../store.js";
+export default {
+  data() {
+    return {
+      searchValue: "",
+    };
+  },
+  methods: {
+    takeSearchValue() {
+      this.searchValue = store.get();
+    },
+  },
+  // mounted() {
+  //   console.log("SearchPhotos mounted");
+  //   this.emitter.on("search-value-changed", (value) => {
+  //     this.searchValue = value.search;
+  //   });
+  //   console.log(this.searchValue);
+  // },
+  mounted() {
+    this.takeSearchValue();
+    console.log(this.searchValue);
+  },
+};
 </script>
 
 <template>
-  <!-- <HeaderApp /> -->
-  <h1>Search</h1>
+  <h1>Search {{ searchValue }}</h1>
 </template>

@@ -37,28 +37,6 @@ export default {
           });
       }
     },
-
-    async fetchPh() {
-      for (let i = 0; i < categories.length; i++) {
-        const response = await fetch(
-          Url + '"' + categories[i].name + '"' + "&count=4"
-        );
-        const data = await response.json();
-        this.photoData = data;
-        //console.log(this.photoData);
-        if (this.photoData != null) {
-          for (let j = 0; j < this.photoData.length; j++) {
-            this.src.push(this.photoData[j].urls.regular);
-          }
-        }
-        // console.log(this.src);
-        this.categoriesPhoto.push({
-          name: categories[i].name,
-          photos: this.src,
-        });
-        this.src = [];
-      }
-    },
   },
   mounted() {
     this.fetchPhotosForCategory();
