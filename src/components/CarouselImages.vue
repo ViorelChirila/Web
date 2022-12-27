@@ -18,7 +18,7 @@ export default {
         .then((response) => response.json())
         .then((data) => {
           this.photoData = data;
-          console.log(this.photoData);
+          // console.log(this.photoData);
           if (this.photoData != null) {
             for (let i = 0; i < this.photoData.length; i++) {
               this.items.push({
@@ -26,7 +26,7 @@ export default {
               });
             }
           }
-          console.log(this.items);
+          // console.log(this.items);
         });
     },
     onClick() {
