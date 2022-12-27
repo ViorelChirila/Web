@@ -13,29 +13,40 @@ export default {
       photoData: null,
       categoriesPhoto: [],
       src: [],
+      photoInfo: [],
+      icons: ["mdi-heart", "mdi-bookmark", "mdi-share-variant"],
+      likeBtnCollor: "white",
     };
   },
   methods: {
     fetchPhotosForCategory() {
       for (let i = 0; i < categories.length; i++) {
-        fetch(Url + '"' + categories[i].name + '"' + "&count=4")
+        fetch(Url + '"' + categories[i].name + '"' + "&count=6")
           .then((response) => response.json())
           .then((data) => {
             this.photoData = data;
             //console.log(this.photoData);
             if (this.photoData != null) {
               for (let j = 0; j < this.photoData.length; j++) {
-                this.src.push(this.photoData[j].urls.regular);
+                // this.src.push(this.photoData[j].urls.regular);
+                this.photoInfo.push(this.photoData[j]);
               }
             }
             // console.log(this.src);
             this.categoriesPhoto.push({
               name: categories[i].name,
-              photos: this.src,
+              // photos: this.src,
+              photos: this.photoInfo,
             });
-            this.src = [];
+            // this.src = [];
+            this.photoInfo = [];
           });
       }
+    },
+    clicked(key) {
+      this.likeBtnCollor = "red";
+      console.log(key);
+      console.log(this.$refs.key);
     },
   },
   mounted() {
@@ -46,9 +57,6 @@ export default {
 };
 </script>
 <template>
-  <!-- <div v-if="categoriesPhoto.length > 0">
-    {{ categoriesPhoto }}
-  </div> -->
   <v-container>
     <v-row justify="center">
       <v-col cols="12" class="mt-2">
@@ -59,56 +67,86 @@ export default {
       <template v-for="n in 4" :key="n">
         <v-col class="mt-2" cols="12">
           <div v-if="categoriesPhoto.length === 4">
-            <strong>{{ categoriesPhoto[n - 1].name }}</strong>
+            <strong class="text-h5">{{ categoriesPhoto[n - 1].name }}</strong>
           </div>
           <v-divider></v-divider>
         </v-col>
 
-        <v-col v-for="j in 4" :key="`${n}${j}`">
-          <!-- <v-sheet height="150" color="grey-darken-4"></v-sheet> -->
-          <v-card>
-            <v-img
-              :src="
-                categoriesPhoto.length === 4
-                  ? categoriesPhoto[n - 1].photos[j - 1]
-                  : 'https://picsum.photos/200/300/?random'
-              "
-              class="align-end"
-              gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
-              cover
+        <v-col v-for="j in 6" :key="`${n}${j}`" cols="12" md="4" sm="6" xl="3">
+          <v-hover v-slot="{ isHovering, props }">
+            <v-card
+              :elevation="isHovering ? 12 : 2"
+              :class="{ 'on-hover': isHovering }"
+              v-bind="props"
+              height="100%"
             >
-              <v-card-title class="text-white"
-                >Favorite road trips</v-card-title
+              <v-img
+                :src="
+                  categoriesPhoto.length === 4
+                    ? categoriesPhoto[n - 1].photos[j - 1].urls.regular
+                    : 'https://picsum.photos/200/300/?random'
+                "
+                cover
+                height="100%"
+                class="d-flex align-end"
               >
-            </v-img>
-
-            <v-card-actions>
-              <v-spacer></v-spacer>
-
-              <v-btn
-                size="small"
-                color="surface-variant"
-                variant="text"
-                icon="mdi-heart"
-              ></v-btn>
-
-              <v-btn
-                size="small"
-                color="surface-variant"
-                variant="text"
-                icon="mdi-bookmark"
-              ></v-btn>
-
-              <v-btn
-                size="small"
-                color="surface-variant"
-                variant="text"
-                icon="mdi-share-variant"
-              ></v-btn>
-            </v-card-actions>
-          </v-card>
+                <div
+                  class="d-flex justify-space-between align-center pb-2 pt-2 pl-2 pr-2 rounded-t-xl divc"
+                  v-if="isHovering"
+                >
+                  <div class="d-flex justify-space-around align-center">
+                    <v-avatar
+                      :image="
+                        categoriesPhoto.length === 4
+                          ? categoriesPhoto[n - 1].photos[j - 1].user
+                              .profile_image.medium
+                          : 'https://picsum.photos/200/300/?random'
+                      "
+                      size="50"
+                      color="grey"
+                      outlined
+                    ></v-avatar>
+                    <p class="text-white text-h6">
+                      {{ categoriesPhoto[n - 1].photos[j - 1].user.name }}
+                    </p>
+                  </div>
+                  <v-btn
+                    variant="text"
+                    :ref="`${n}${j}`"
+                    :key="`${n}${j}`"
+                    :class="{ 'show-btns': isHovering }"
+                    :color="likeBtnCollor"
+                    @click="clicked(`${n}${j}`)"
+                    icon
+                    ><v-tooltip activator="parent" location="top">{{
+                      categoriesPhoto[n - 1].photos[j - 1].likes
+                    }}</v-tooltip>
+                    <v-icon icon="mdi-heart"></v-icon>
+                  </v-btn>
+                </div>
+              </v-img>
+            </v-card>
+          </v-hover>
         </v-col>
       </template>
     </v-row>
   </v-container>
 </template>
+<style>
+.v-card {
+  transition: opacity 0.4s ease-in-out;
+}
+
+.v-card:not(.on-hover) {
+  opacity: 0.8;
+}
+
+.show-btns {
+  color: rgba(255, 255, 255, 1) !important;
+  background-color: rgba(248, 6, 196, 0.5);
+}
+
+.divc {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+</style>
