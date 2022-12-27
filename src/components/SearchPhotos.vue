@@ -27,4 +27,11 @@ export default {
 
 <template>
   <h1>Search {{ searchValue }}</h1>
+  <v-container>
+    <v-row>
+      <v-col v-for="n in 24" :key="n" cols="12" md="3" sm="6">
+        <v-card height="200" color="grey-darken-4"></v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
