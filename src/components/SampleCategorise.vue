@@ -43,10 +43,9 @@ export default {
           });
       }
     },
-    clicked(key) {
-      this.likeBtnCollor = "red";
-      console.log(key);
-      console.log(this.$refs.key);
+    clicked(ke) {
+      // this.likeBtnCollor = "red";
+      console.log(this.$refs[ke][0].$props.color);
     },
   },
   mounted() {
@@ -115,7 +114,7 @@ export default {
                     :ref="`${n}${j}`"
                     :key="`${n}${j}`"
                     :class="{ 'show-btns': isHovering }"
-                    :color="likeBtnCollor"
+                    color="white"
                     @click="clicked(`${n}${j}`)"
                     icon
                     ><v-tooltip activator="parent" location="top">{{
