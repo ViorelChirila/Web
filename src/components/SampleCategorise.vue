@@ -1,4 +1,5 @@
 <script>
+import * as reqOp from "../assets/js/requestOptions.js";
 const categories = [
   { name: "Nature" },
   { name: "People" },
@@ -14,14 +15,16 @@ export default {
       categoriesPhoto: [],
       src: [],
       photoInfo: [],
-      icons: ["mdi-heart", "mdi-bookmark", "mdi-share-variant"],
-      likeBtnCollor: "white",
+      selection: [],
     };
   },
   methods: {
     fetchPhotosForCategory() {
       for (let i = 0; i < categories.length; i++) {
-        fetch(Url + '"' + categories[i].name + '"' + "&count=6")
+        fetch(
+          Url + '"' + categories[i].name + '"' + "&count=6",
+          reqOp.requestOptionsGet
+        )
           .then((response) => response.json())
           .then((data) => {
             this.photoData = data;
@@ -43,9 +46,40 @@ export default {
           });
       }
     },
-    clicked(ke) {
-      // this.likeBtnCollor = "red";
-      console.log(this.$refs[ke][0].$props.color);
+    likePhoto(n, j) {
+      fetch(
+        "https://api.unsplash.com/photos/" +
+          this.categoriesPhoto[n - 1].photos[j - 1].id +
+          "/like",
+        reqOp.requestOptionPost
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          this.photoData = data;
+          this.categoriesPhoto[n - 1].photos[j - 1] = this.photoData.photo;
+          console.log(data);
+        });
+    },
+    unlikePhoto(n, j) {
+      fetch(
+        "https://api.unsplash.com/photos/" +
+          this.categoriesPhoto[n - 1].photos[j - 1].id +
+          "/like",
+        reqOp.requestOptionDelete
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          this.photoData = data;
+          this.categoriesPhoto[n - 1].photos[j - 1] = this.photoData.photo;
+          console.log(data);
+        });
+    },
+    likeBtnAction(n, j) {
+      if (this.categoriesPhoto[n - 1].photos[j - 1].liked_by_user) {
+        this.unlikePhoto(n, j);
+      } else {
+        this.likePhoto(n, j);
+      }
     },
   },
   mounted() {
@@ -57,78 +91,92 @@ export default {
 </script>
 <template>
   <v-container>
-    <v-row justify="center">
-      <v-col cols="12" class="mt-2">
-        <h2 class="text-center">Here are some photos you can get !</h2>
-      </v-col>
-    </v-row>
-    <v-row justify="center">
-      <template v-for="n in 4" :key="n">
-        <v-col class="mt-2" cols="12">
-          <div v-if="categoriesPhoto.length === 4">
-            <strong class="text-h5">{{ categoriesPhoto[n - 1].name }}</strong>
-          </div>
-          <v-divider></v-divider>
+    <v-item-group v-model="selection" multiple>
+      <v-row justify="center">
+        <v-col cols="12" class="mt-2">
+          <h2 class="text-center">Here are some photos you can get !</h2>
         </v-col>
+      </v-row>
+      <v-row justify="center">
+        <template v-for="n in 4" :key="n">
+          <v-col class="mt-2" cols="12">
+            <div v-if="categoriesPhoto.length === 4">
+              <strong class="text-h5">{{ categoriesPhoto[n - 1].name }}</strong>
+            </div>
+            <v-divider></v-divider>
+          </v-col>
 
-        <v-col v-for="j in 6" :key="`${n}${j}`" cols="12" md="4" sm="6" xl="3">
-          <v-hover v-slot="{ isHovering, props }">
-            <v-card
-              :elevation="isHovering ? 12 : 2"
-              :class="{ 'on-hover': isHovering }"
-              v-bind="props"
-              height="100%"
-            >
-              <v-img
-                :src="
-                  categoriesPhoto.length === 4
-                    ? categoriesPhoto[n - 1].photos[j - 1].urls.regular
-                    : 'https://picsum.photos/200/300/?random'
-                "
-                cover
-                height="100%"
-                class="d-flex align-end"
-              >
-                <div
-                  class="d-flex justify-space-between align-center pb-2 pt-2 pl-2 pr-2 rounded-t-xl divc"
-                  v-if="isHovering"
+          <v-col
+            v-for="j in 6"
+            :key="`${n}${j}`"
+            cols="12"
+            md="4"
+            sm="6"
+            xl="3"
+          >
+            <v-item>
+              <v-hover v-slot="{ isHovering, props }">
+                <v-card
+                  :elevation="isHovering ? 12 : 2"
+                  :class="{ 'on-hover': isHovering }"
+                  v-bind="props"
+                  height="100%"
                 >
-                  <div class="d-flex justify-space-around align-center">
-                    <v-avatar
-                      :image="
-                        categoriesPhoto.length === 4
-                          ? categoriesPhoto[n - 1].photos[j - 1].user
-                              .profile_image.medium
-                          : 'https://picsum.photos/200/300/?random'
-                      "
-                      size="50"
-                      color="grey"
-                      outlined
-                    ></v-avatar>
-                    <p class="text-white text-h6">
-                      {{ categoriesPhoto[n - 1].photos[j - 1].user.name }}
-                    </p>
-                  </div>
-                  <v-btn
-                    variant="text"
-                    :ref="`${n}${j}`"
-                    :key="`${n}${j}`"
-                    :class="{ 'show-btns': isHovering }"
-                    color="white"
-                    @click="clicked(`${n}${j}`)"
-                    icon
-                    ><v-tooltip activator="parent" location="top">{{
-                      categoriesPhoto[n - 1].photos[j - 1].likes
-                    }}</v-tooltip>
-                    <v-icon icon="mdi-heart"></v-icon>
-                  </v-btn>
-                </div>
-              </v-img>
-            </v-card>
-          </v-hover>
-        </v-col>
-      </template>
-    </v-row>
+                  <v-img
+                    :src="
+                      categoriesPhoto.length === 4
+                        ? categoriesPhoto[n - 1].photos[j - 1].urls.regular
+                        : 'https://picsum.photos/200/300/?random'
+                    "
+                    cover
+                    height="100%"
+                    class="d-flex align-end"
+                  >
+                    <div
+                      class="d-flex justify-space-between align-center pb-2 pt-2 pl-2 pr-2 rounded-t-xl divc"
+                      v-if="isHovering"
+                    >
+                      <div class="d-flex justify-space-around align-center">
+                        <v-avatar
+                          :image="
+                            categoriesPhoto.length === 4
+                              ? categoriesPhoto[n - 1].photos[j - 1].user
+                                  .profile_image.medium
+                              : 'https://picsum.photos/200/300/?random'
+                          "
+                          size="50"
+                          color="grey"
+                          outlined
+                        ></v-avatar>
+                        <p class="text-white text-h6">
+                          {{ categoriesPhoto[n - 1].photos[j - 1].user.name }}
+                        </p>
+                      </div>
+                      <v-btn
+                        variant="text"
+                        :key="`${n}${j}`"
+                        @click="likeBtnAction(n, j)"
+                        :class="{ 'show-btns': isHovering }"
+                        :color="
+                          categoriesPhoto[n - 1].photos[j - 1].liked_by_user
+                            ? 'red'
+                            : 'white'
+                        "
+                        icon
+                        ><v-tooltip activator="parent" location="top">{{
+                          categoriesPhoto[n - 1].photos[j - 1].likes
+                        }}</v-tooltip>
+                        <v-icon icon="mdi-heart"></v-icon>
+                      </v-btn>
+                    </div>
+                  </v-img>
+                </v-card>
+              </v-hover>
+            </v-item>
+          </v-col>
+        </template>
+      </v-row>
+    </v-item-group>
   </v-container>
 </template>
 <style>
