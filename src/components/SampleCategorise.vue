@@ -1,3 +1,7 @@
+<script setup>
+import DisplayPhoto from "./DisplayPhoto.vue";
+</script>
+
 <script>
 import * as reqOp from "../assets/js/requestOptions.js";
 const categories = [
@@ -16,6 +20,8 @@ export default {
       src: [],
       photoInfo: [],
       selection: [],
+      dialog: false,
+      send: null,
     };
   },
   methods: {
@@ -131,6 +137,10 @@ export default {
                     cover
                     height="100%"
                     class="d-flex align-end"
+                    @click="
+                      (dialog = true),
+                        (send = categoriesPhoto[n - 1].photos[j - 1])
+                    "
                   >
                     <div
                       class="d-flex justify-space-between align-center pb-2 pt-2 pl-2 pr-2 rounded-t-xl divc"
@@ -178,6 +188,9 @@ export default {
       </v-row>
     </v-item-group>
   </v-container>
+  <v-dialog v-model="dialog">
+    <DisplayPhoto v-bind:photo="send" />
+  </v-dialog>
 </template>
 <style>
 .v-card {
