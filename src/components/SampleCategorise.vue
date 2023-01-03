@@ -22,6 +22,8 @@ export default {
       selection: [],
       dialog: false,
       send: null,
+      nSend: null,
+      jSend: null,
     };
   },
   methods: {
@@ -87,6 +89,19 @@ export default {
         this.likePhoto(n, j);
       }
     },
+    receiveData(dataRec) {
+      fetch(
+        "https://api.unsplash.com/photos/" +
+          dataRec.id +
+          "/?client_id=wNsRTVDYYKFyvucwPQKjPM1lNGoffo_j7WkO-FVzp4I",
+        reqOp.requestOptionsGet
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          this.categoriesPhoto[this.nSend - 1].photos[this.jSend - 1] = data;
+          this.send = data;
+        });
+    },
   },
   mounted() {
     this.fetchPhotosForCategory();
@@ -103,7 +118,7 @@ export default {
           <h2 class="text-center">Here are some photos you can get !</h2>
         </v-col>
       </v-row>
-      <v-row justify="center">
+      <v-row justify="space-between">
         <template v-for="n in 4" :key="n">
           <v-col class="mt-2" cols="12">
             <div v-if="categoriesPhoto.length === 4">
@@ -139,7 +154,9 @@ export default {
                     class="d-flex align-end"
                     @click="
                       (dialog = true),
-                        (send = categoriesPhoto[n - 1].photos[j - 1])
+                        (send = categoriesPhoto[n - 1].photos[j - 1]),
+                        (nSend = n),
+                        (jSend = j)
                     "
                   >
                     <div
@@ -165,7 +182,7 @@ export default {
                       <v-btn
                         variant="text"
                         :key="`${n}${j}`"
-                        @click="likeBtnAction(n, j)"
+                        @click.stop="likeBtnAction(n, j)"
                         :class="{ 'show-btns': isHovering }"
                         :color="
                           categoriesPhoto[n - 1].photos[j - 1].liked_by_user
@@ -189,7 +206,7 @@ export default {
     </v-item-group>
   </v-container>
   <v-dialog v-model="dialog">
-    <DisplayPhoto v-bind:photo="send" />
+    <DisplayPhoto v-bind:photo="send" @sendData="receiveData($event)" />
   </v-dialog>
 </template>
 <style>

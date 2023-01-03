@@ -1,9 +1,11 @@
 <script>
+import * as reqOp from "../assets/js/requestOptions.js";
 const client_id = "&client_id=wNsRTVDYYKFyvucwPQKjPM1lNGoffo_j7WkO-FVzp4I";
 export default {
   props: ["photo"],
   data() {
     return {
+      photoData: null,
       show: false,
       zoom: false,
       maHeight: 700,
@@ -24,6 +26,21 @@ export default {
           size: "&force=true&w=2400",
         },
         { text: "Original Size", subtitle: null, src: null, size: "" },
+      ],
+      infos: [
+        { title: "Likes", subtitle: "--", icon: "mdi-heart" },
+        { title: "Downloads", subtitle: "--", icon: "mdi-download" },
+        { title: "Views", subtitle: "--", icon: "mdi-eye" },
+      ],
+      descriptions: [
+        { title: "Description", subtitle: "--" },
+        { title: "Location", subtitle: "--" },
+        { title: "Camera", subtitle: "--" },
+        { title: "Aperture", subtitle: "--" },
+        { title: "Focal length", subtitle: "--" },
+        { title: "Exposure time", subtitle: "--" },
+        { title: "ISO", subtitle: "--" },
+        { title: "Dimensions", subtitle: "--" },
       ],
     };
   },
@@ -62,6 +79,38 @@ export default {
           this.toDataURL(url);
         });
     },
+    likePhoto() {
+      fetch(
+        "https://api.unsplash.com/photos/" + this.photo.id + "/like",
+        reqOp.requestOptionPost
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          this.sendData(data.photo);
+          console.log(data);
+        });
+    },
+    unlikePhoto() {
+      fetch(
+        "https://api.unsplash.com/photos/" + this.photo.id + "/like",
+        reqOp.requestOptionDelete
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          this.sendData(data.photo);
+          console.log(data);
+        });
+    },
+    likeBtnAction() {
+      if (this.photo.liked_by_user) {
+        this.unlikePhoto();
+      } else {
+        this.likePhoto();
+      }
+    },
+    sendData(value) {
+      this.$emit("sendData", value);
+    },
   },
   mounted() {
     if (this.photo !== null) {
@@ -79,6 +128,34 @@ export default {
       this.items[3].subtitle =
         "(" + this.photo.width + " x " + this.photo.height + ")";
       this.items[3].src = this.photo.links.download_location + client_id;
+
+      this.infos[0].subtitle = this.photo.likes;
+      this.infos[1].subtitle = this.photo.downloads;
+      this.infos[2].subtitle = this.photo.views;
+
+      this.descriptions[0].subtitle = this.photo.description
+        ? this.photo.description
+        : this.photo.alt_description;
+      this.descriptions[1].subtitle = this.photo.location.name
+        ? this.photo.location.name
+        : "--";
+      this.descriptions[2].subtitle = this.photo.exif.name
+        ? this.photo.exif.name
+        : "--";
+      this.descriptions[3].subtitle = this.photo.exif.aperture
+        ? this.photo.exif.aperture
+        : "--";
+      this.descriptions[4].subtitle = this.photo.exif.focal_length
+        ? this.photo.exif.focal_length
+        : "--";
+      this.descriptions[5].subtitle = this.photo.exif.exposure_time
+        ? this.photo.exif.exposure_time
+        : "--";
+      this.descriptions[6].subtitle = this.photo.exif.iso
+        ? this.photo.exif.iso
+        : "--";
+      this.descriptions[7].subtitle =
+        this.photo.width + " x " + this.photo.height;
     }
   },
 };
@@ -87,7 +164,7 @@ export default {
   <v-card class="opaque-content">
     <v-img
       :key="zoom"
-      :src="photo.urls.raw"
+      :src="photo.urls.regular"
       :lazy-src="photo.urls.thumb"
       :max-height="maHeight"
       :cover="cov"
@@ -108,7 +185,9 @@ export default {
       </v-btn>
     </div>
     <!-- <v-card-subtitle> 1,000 miles of wonder </v-card-subtitle> -->
-    <div class="d-flex justify-space-between align-center pt-2">
+    <div
+      class="d-flex flex-sm-column flex-md-row flex-lg-row justify-space-between align-center pt-2"
+    >
       <v-list lines="one" class="pa-2">
         <v-list-item :title="photo.user.name" :subtitle="photo.user.username">
           <template v-slot:prepend>
@@ -121,13 +200,41 @@ export default {
             </v-avatar> </template
         ></v-list-item>
       </v-list>
+      <div class="d-flex justify-space-around mx-3">
+        <v-list density="compact" v-for="item in infos" :key="item.title">
+          <v-list-item>
+            <template v-slot:prepend>
+              <v-icon
+                :color="
+                  item.icon === 'mdi-heart'
+                    ? 'red'
+                    : item.icon === 'mdi-download'
+                    ? 'blue'
+                    : item.icon === 'mdi-eye'
+                    ? 'black'
+                    : 'black'
+                "
+                >{{ item.icon }}</v-icon
+              >
+            </template>
+
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+            <v-list-item-subtitle>{{ item.subtitle }}</v-list-item-subtitle>
+          </v-list-item>
+        </v-list>
+      </div>
       <div>
-        <v-btn variant="outlined">
+        <v-btn
+          class="ma-2 pa-2"
+          variant="outlined"
+          :color="photo.liked_by_user ? 'red' : 'black'"
+          @click="likeBtnAction"
+        >
           <v-icon>mdi-heart</v-icon>
         </v-btn>
         <v-menu open-on-hover location="start">
           <template v-slot:activator="{ props }">
-            <v-btn class="ma-3 pa-2" variant="outlined" v-bind="props">
+            <v-btn class="ma-2 pa-2" variant="outlined" v-bind="props">
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </template>
@@ -147,7 +254,9 @@ export default {
       </div>
     </div>
     <v-card-actions>
-      <v-btn color="orange-lighten-2" variant="text"> Explore </v-btn>
+      <v-btn color="orange-lighten-2" variant="text" @click="show = !show">
+        Description
+      </v-btn>
 
       <v-spacer></v-spacer>
 
@@ -162,11 +271,10 @@ export default {
         <v-divider></v-divider>
 
         <v-card-text>
-          I'm a thing. But, like most politicians, he promised more than he
-          could deliver. You won't have time for sleeping, soldier, not with all
-          the bed making you'll be doing. Then we'll go with that data file!
-          Hey, you add a one and two zeros to that or we walk! You're going to
-          do his laundry? I've got to find a way to escape.
+          <p v-for="item in descriptions" :key="item.title" class="niceTXT">
+            <strong class="text-uppercase">{{ item.title }}: </strong>
+            <span class="font-italic">{{ item.subtitle }}</span>
+          </p>
         </v-card-text>
       </div>
     </v-expand-transition>
@@ -183,5 +291,12 @@ export default {
   position: absolute;
   top: 0;
   right: 0;
+}
+.niceTXT {
+  font-family: "Gambetta", serif;
+  letter-spacing: 1px;
+  margin-bottom: 0.2rem;
+  color: rgb(114, 105, 112);
+  outline: none;
 }
 </style>
