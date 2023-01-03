@@ -1,4 +1,5 @@
 <script>
+const client_id = "&client_id=wNsRTVDYYKFyvucwPQKjPM1lNGoffo_j7WkO-FVzp4I";
 export default {
   props: ["photo"],
   data() {
@@ -7,6 +8,23 @@ export default {
       zoom: false,
       maHeight: 700,
       cov: false,
+      ratio: null,
+      items: [
+        { text: "Small", subtitle: null, src: null, size: "&force=true&w=640" },
+        {
+          text: "Medium",
+          subtitle: null,
+          src: null,
+          size: "&force=true&w=1920",
+        },
+        {
+          text: "Large",
+          subtitle: null,
+          src: null,
+          size: "&force=true&w=2400",
+        },
+        { text: "Original Size", subtitle: null, src: null, size: "" },
+      ],
     };
   },
   methods: {
@@ -19,6 +37,49 @@ export default {
         this.cov = true;
       }
     },
+    calculateAspectRatio() {
+      let width = this.photo.width;
+      let height = this.photo.height;
+      let ratio = height / width;
+      return ratio;
+    },
+    async toDataURL(url) {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const imageUrl = window.URL.createObjectURL(blob);
+      console.log(imageUrl);
+      let link = document.createElement("a");
+      link.href = imageUrl;
+      link.download = "phapp-" + this.photo.id;
+      link.click();
+    },
+    downloadPhoto(linkPh, size) {
+      fetch(linkPh)
+        .then((response) => response.json())
+        .then((data) => {
+          let url = data.url;
+          url = url + size;
+          this.toDataURL(url);
+        });
+    },
+  },
+  mounted() {
+    if (this.photo !== null) {
+      this.ratio = this.calculateAspectRatio();
+
+      this.items[0].subtitle = "(640 x " + Math.trunc(640 * this.ratio) + ")";
+      this.items[0].src = this.photo.links.download_location + client_id;
+
+      this.items[1].subtitle = "(1920 x " + Math.trunc(1920 * this.ratio) + ")";
+      this.items[1].src = this.photo.links.download_location + client_id;
+
+      this.items[2].subtitle = "(2400 x " + Math.trunc(2400 * this.ratio) + ")";
+      this.items[2].src = this.photo.links.download_location + client_id;
+
+      this.items[3].subtitle =
+        "(" + this.photo.width + " x " + this.photo.height + ")";
+      this.items[3].src = this.photo.links.download_location + client_id;
+    }
   },
 };
 </script>
@@ -46,10 +107,45 @@ export default {
         <v-icon v-else>mdi-magnify</v-icon>
       </v-btn>
     </div>
-    <v-card-title> Top western road trips </v-card-title>
-
-    <v-card-subtitle> 1,000 miles of wonder </v-card-subtitle>
-
+    <!-- <v-card-subtitle> 1,000 miles of wonder </v-card-subtitle> -->
+    <div class="d-flex justify-space-between align-center pt-2">
+      <v-list lines="one" class="pa-2">
+        <v-list-item :title="photo.user.name" :subtitle="photo.user.username">
+          <template v-slot:prepend>
+            <v-avatar
+              :image="photo.user.profile_image.medium"
+              size="60"
+              color="grey"
+              outlined
+            >
+            </v-avatar> </template
+        ></v-list-item>
+      </v-list>
+      <div>
+        <v-btn variant="outlined">
+          <v-icon>mdi-heart</v-icon>
+        </v-btn>
+        <v-menu open-on-hover location="start">
+          <template v-slot:activator="{ props }">
+            <v-btn class="ma-3 pa-2" variant="outlined" v-bind="props">
+              <v-icon>mdi-download</v-icon>
+            </v-btn>
+          </template>
+          <v-list :lines="false" density="compact" nav>
+            <v-list-item
+              v-for="(item, i) in items"
+              :key="i"
+              :value="item"
+              active-color="primary"
+              @click="downloadPhoto(item.src, item.size)"
+            >
+              <v-list-item-title>{{ item.text }}</v-list-item-title>
+              <v-list-item-subtitle>{{ item.subtitle }}</v-list-item-subtitle>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </div>
+    </div>
     <v-card-actions>
       <v-btn color="orange-lighten-2" variant="text"> Explore </v-btn>
 
