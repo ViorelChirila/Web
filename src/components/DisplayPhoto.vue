@@ -33,9 +33,11 @@ export default {
         { title: "Views", subtitle: "--", icon: "mdi-eye" },
       ],
       descriptions: [
-        { title: "Description", subtitle: "--" },
-        { title: "Location", subtitle: "--" },
-        { title: "Camera", subtitle: "--" },
+        { id: 0, title: "--", icon: "mdi-account" },
+        { id: 1, title: "--", icon: "mdi-map-marker" },
+        { id: 2, title: "--", icon: "mdi-camera" },
+      ],
+      cameraInfo: [
         { title: "Aperture", subtitle: "--" },
         { title: "Focal length", subtitle: "--" },
         { title: "Exposure time", subtitle: "--" },
@@ -133,28 +135,29 @@ export default {
       this.infos[1].subtitle = this.photo.downloads;
       this.infos[2].subtitle = this.photo.views;
 
-      this.descriptions[0].subtitle = this.photo.description
+      this.descriptions[0].title = this.photo.description
         ? this.photo.description
         : this.photo.alt_description;
-      this.descriptions[1].subtitle = this.photo.location.name
+      this.descriptions[1].title = this.photo.location.name
         ? this.photo.location.name
         : "--";
-      this.descriptions[2].subtitle = this.photo.exif.name
+      this.descriptions[2].title = this.photo.exif.name
         ? this.photo.exif.name
         : "--";
-      this.descriptions[3].subtitle = this.photo.exif.aperture
+
+      this.cameraInfo[0].subtitle = this.photo.exif.aperture
         ? this.photo.exif.aperture
         : "--";
-      this.descriptions[4].subtitle = this.photo.exif.focal_length
+      this.cameraInfo[1].subtitle = this.photo.exif.focal_length
         ? this.photo.exif.focal_length
         : "--";
-      this.descriptions[5].subtitle = this.photo.exif.exposure_time
+      this.cameraInfo[2].subtitle = this.photo.exif.exposure_time
         ? this.photo.exif.exposure_time
         : "--";
-      this.descriptions[6].subtitle = this.photo.exif.iso
+      this.cameraInfo[3].subtitle = this.photo.exif.iso
         ? this.photo.exif.iso
         : "--";
-      this.descriptions[7].subtitle =
+      this.cameraInfo[4].subtitle =
         this.photo.width + " x " + this.photo.height;
     }
   },
@@ -271,9 +274,30 @@ export default {
         <v-divider></v-divider>
 
         <v-card-text>
-          <p v-for="item in descriptions" :key="item.title" class="niceTXT">
-            <strong class="text-uppercase">{{ item.title }}: </strong>
-            <span class="font-italic">{{ item.subtitle }}</span>
+          <p v-for="item in descriptions" :key="item.id" class="niceTXT">
+            <v-icon class="mr-2" color="grey">{{ item.icon }}</v-icon>
+            <span class="font-italic"
+              >{{ item.title }}
+              <v-tooltip
+                v-if="item.icon === 'mdi-camera'"
+                activator="parent"
+                location="top"
+              >
+                <v-list
+                  lines="one"
+                  density="compact"
+                  nav
+                  class="transparent-content"
+                >
+                  <v-list-item
+                    v-for="item in cameraInfo"
+                    :key="item.title"
+                    :title="item.title"
+                    :subtitle="item.subtitle"
+                  ></v-list-item>
+                </v-list>
+              </v-tooltip>
+            </span>
           </p>
         </v-card-text>
       </div>
@@ -281,6 +305,10 @@ export default {
   </v-card>
 </template>
 <style>
+.transparent-content {
+  background-color: transparent !important;
+  color: white !important;
+}
 .opaque-content {
   opacity: 1 !important;
 }
