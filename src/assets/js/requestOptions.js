@@ -19,3 +19,5 @@ export const requestOptionDelete = {
   },
   redirect: "follow",
 };
+export const client_id =
+  "client_id=wNsRTVDYYKFyvucwPQKjPM1lNGoffo_j7WkO-FVzp4I";

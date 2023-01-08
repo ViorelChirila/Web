@@ -6,6 +6,7 @@ export default {
   data() {
     return {
       photoData: null,
+      photoInfo: null,
       show: false,
       zoom: false,
       maHeight: 700,
@@ -116,6 +117,7 @@ export default {
   },
   mounted() {
     if (this.photo !== null) {
+      console.log(this.photo);
       this.ratio = this.calculateAspectRatio();
 
       this.items[0].subtitle = "(640 x " + Math.trunc(640 * this.ratio) + ")";
@@ -131,32 +133,50 @@ export default {
         "(" + this.photo.width + " x " + this.photo.height + ")";
       this.items[3].src = this.photo.links.download_location + client_id;
 
-      this.infos[0].subtitle = this.photo.likes;
-      this.infos[1].subtitle = this.photo.downloads;
-      this.infos[2].subtitle = this.photo.views;
+      fetch(
+        "https://api.unsplash.com/photos/" + this.photo.id + "/?" + client_id,
+        reqOp.requestOptionGet
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          this.photoInfo = data;
+          this.infos[0].subtitle = this.photoInfo.likes;
+          this.infos[1].subtitle = this.photoInfo.downloads;
+          this.infos[2].subtitle = this.photoInfo.views;
+        });
+
+      // this.infos[0].subtitle = this.photo.likes;
+      // this.infos[1].subtitle = this.photo.downloads;
+      // this.infos[2].subtitle = this.photo.views;
 
       this.descriptions[0].title = this.photo.description
         ? this.photo.description
         : this.photo.alt_description;
-      this.descriptions[1].title = this.photo.location.name
-        ? this.photo.location.name
-        : "--";
-      this.descriptions[2].title = this.photo.exif.name
-        ? this.photo.exif.name
-        : "--";
+      if ("location" in this.photo) {
+        this.descriptions[1].title = this.photo.location.name
+          ? this.photo.location.name
+          : "--";
+      }
 
-      this.cameraInfo[0].subtitle = this.photo.exif.aperture
-        ? this.photo.exif.aperture
-        : "--";
-      this.cameraInfo[1].subtitle = this.photo.exif.focal_length
-        ? this.photo.exif.focal_length
-        : "--";
-      this.cameraInfo[2].subtitle = this.photo.exif.exposure_time
-        ? this.photo.exif.exposure_time
-        : "--";
-      this.cameraInfo[3].subtitle = this.photo.exif.iso
-        ? this.photo.exif.iso
-        : "--";
+      if ("exif" in this.photo) {
+        this.descriptions[2].title = this.photo.exif.name
+          ? this.photo.exif.name
+          : "--";
+
+        this.cameraInfo[0].subtitle = this.photo.exif.aperture
+          ? this.photo.exif.aperture
+          : "--";
+        this.cameraInfo[1].subtitle = this.photo.exif.focal_length
+          ? this.photo.exif.focal_length
+          : "--";
+        this.cameraInfo[2].subtitle = this.photo.exif.exposure_time
+          ? this.photo.exif.exposure_time
+          : "--";
+        this.cameraInfo[3].subtitle = this.photo.exif.iso
+          ? this.photo.exif.iso
+          : "--";
+      }
+
       this.cameraInfo[4].subtitle =
         this.photo.width + " x " + this.photo.height;
     }
